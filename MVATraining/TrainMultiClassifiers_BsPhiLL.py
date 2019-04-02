@@ -23,25 +23,30 @@ TMVA.PyMethodBase.PyInitialize()
 #TMVA.RMethodBase.Initialize()
 #MethodRXGB.Init()
 
-output = TFile.Open('Output_Classification_BsPhiEE.root', 'RECREATE')
+output = TFile.Open('Output_Classification_BsPhiJpsiEE_noPhiM_pTcuts_BOBest.root', 'RECREATE')
 #factory = TMVA.Factory('TMVAClassification_BsPhiEE', output,
 #        '!V:ROC:!Silent:Color:DrawProgressBar:Transformations=D,G:AnalysisType=Classification')
 
-factory = TMVA.Factory('TMVAClassification_BsPhiEE', output,
+factory = TMVA.Factory('TMVAClassification_BsPhiJpsiEE_noPhiM_pTcuts_BOBest', output,
         '!V:ROC:!Silent:Color:DrawProgressBar:AnalysisType=Classification')
 
-bkg_name = "/eos/uscms/store/user/klau/BsPhiLL_output/BsPhiEE_MVATraining/BsPhiEE_MVATraining_Bkg.root"
-sig_name = "/eos/uscms/store/user/klau/BsPhiLL_output/BsPhiEE_MVATraining/BsPhiEE_MVATraining_Sig.root"
+bkg_name = "BsPhiJpsiEE_MVATraining_Bkg_pTcuts.root"
+sig_name = "BsPhiJpsiEE_MVATraining_Sig_pTcuts.root"
+#bkg_name = "BsPhiJpsiEE_MVATraining_Bkg.root"
+#sig_name = "BsPhiJpsiEE_MVATraining_Sig.root"
 
-branches = ['elePtLead', 'elePtSublead', 'kaonPtLead', 'kaonPtSublead', 'jpsiPt', 'phiPt', 'bsPt', 'eledR', 'kaondR', 'jpsiPhidR', 'svProb', 'svCosine', 'svLxySig', 'eleD0Lead', 'eleD0Sublead', 'eleDzLead', 'eleDzSublead', 'kaonD0Lead', 'kaonD0Sublead', 'kaonDzLead', 'kaonDzSublead', 'kaonNormChi2Lead', 'kaonNormChi2Sublead']
+#branches = ['elePtLead', 'elePtSublead', 'kaonPtLead', 'kaonPtSublead', 'jpsiPt', 'phiPt', 'bsPt', 'eledR', 'kaondR', 'jpsiPhidR', 'svProb', 'svCosine', 'svLxySig', 'eleD0Lead', 'eleD0Sublead', 'eleDzLead', 'eleDzSublead', 'kaonD0Lead', 'kaonD0Sublead', 'kaonDzLead', 'kaonDzSublead', 'kaonNormChi2Lead', 'kaonNormChi2Sublead']
+#branches = ['elePtLead', 'elePtSublead', 'kaonPtLead', 'kaonPtSublead', 'bsPt', 'eledR', 'kaondR', 'jpsiPhidR', 'svProb', 'svCosine', 'svLxySig', 'eleD0Lead', 'eleD0Sublead', 'eleDzLead', 'eleDzSublead', 'kaonD0Lead', 'kaonD0Sublead', 'kaonDzLead', 'kaonDzSublead', 'kaonNormChi2Lead', 'kaonNormChi2Sublead']
+branches = ['elePtLead', 'elePtSublead', 'kaonPtLead', 'kaonPtSublead', 'bsPt', 'svProb', 'svCosine', 'svLxySig', 'eleD0Lead', 'eleD0Sublead', 'eleDzLead', 'eleDzSublead', 'kaonD0Lead', 'kaonD0Sublead', 'kaonDzLead', 'kaonDzSublead', 'kaonNormChi2Lead', 'kaonNormChi2Sublead']
+#branches = ['elePtLead', 'elePtSublead', 'kaonPtLead', 'kaonPtSublead', 'bsPt', 'svProb', 'svCosine', 'svLxySig', 'eleD0Lead', 'eleD0Sublead', 'eleDzLead', 'eleDzSublead', 'kaonD0Lead', 'kaonD0Sublead', 'kaonDzLead', 'kaonDzSublead', 'kaonNormChi2Lead', 'kaonNormChi2Sublead', 'phiMassFrac']
 
 input_dim = len(branches)
 
 use = {}
-use['BDT'] = True
-use['PyGTB'] = True
-use['PyRandomForest'] = True
-use['PyAdaBoost'] = True
+use['BDT'] = False
+use['PyGTB'] = False
+use['PyRandomForest'] = False
+use['PyAdaBoost'] = False
 use['RXGB'] = False
 use['PyKeras']  = True
 use['DL_DENSE'] = False
@@ -70,19 +75,23 @@ def normal(shape, name=None):
 
 # Define model
 model = Sequential()
-model.add(Dense(units=256, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
+#model.add(Dense(units=256, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
 #model.add(Dropout(0.2))
-model.add(Dense(units=128, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
+#model.add(Dense(units=128, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
 #model.add(Dropout(0.2))
-model.add(Dense(units=64, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
+#model.add(Dense(units=64, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
 #model.add(Dropout(0.2))
-model.add(Dense(units=32, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
+#model.add(Dense(units=32, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1e-5)))
 #model.add(Dropout(0.2))
+model.add(Dense(units=276, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1.e-06)))
+model.add(Dropout(0.15948786))
+model.add(Dense(units=138, input_shape=(input_dim,), kernel_initializer='glorot_normal', activation='relu', kernel_regularizer=l2(1.e-06)))
+model.add(Dropout(0.15948786))
 model.add(Dense(2, activation='softmax'))
 
-
 # Set loss and optimizer
-model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=1e-3), metrics=['accuracy',])
+#model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=1e-3), metrics=['accuracy',])
+model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.00042235), metrics=['accuracy',])
 
 # Store model to file
 model.save('model.h5')
@@ -134,7 +143,7 @@ if use['RXGB']:
 ## Keras Neural Network
 if use['PyKeras']:
     factory.BookMethod(dataloader, TMVA.Types.kPyKeras, 'PyKeras',
-            'H:!V:FilenameModel=model.h5:NumEpochs=200:BatchSize=16:VarTransform=None')
+            'H:!V:FilenameModel=model.h5:NumEpochs=200:BatchSize=1682:VarTransform=None')
 
 ## TMVA Neural Network
 if use['DL_DENSE']:

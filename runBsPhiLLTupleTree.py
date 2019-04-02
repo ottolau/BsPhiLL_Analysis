@@ -48,7 +48,8 @@ if not args.runparallel:
             break
     #tchain.Add('ggtree_data.root')
     print('Total number of events: ' + str(tchain.GetEntries()))
-    analyzer = "MVAEvaluation_electron"
+    #analyzer = "MVAEvaluation_electron"
+    analyzer = "CutBasedEvaluation_electron"
     ROOT.gSystem.CompileMacro("analyzer_class/%s.C"%(analyzer)) 
     from ROOT import BsPhiLLTupleTree
     myAnalyzer = BsPhiLLTupleTree(tchain)
@@ -68,7 +69,8 @@ else:
     # stplie files in to n(group) of chunks
     fChunks= list(chunks(fileList,group))
     print ("writing %s jobs for %s"%(len(fChunks),outputFolder))
-    analyzer = "MVAEvaluation_electron"
+    #analyzer = "MVAEvaluation_electron"
+    analyzer = "CutBasedEvaluation_electron"
     ROOT.gSystem.CompileMacro("analyzer_class/%s.C"%(analyzer)) 
     from ROOT import BsPhiLLTupleTree
     pool = mp.Pool(processes = 6)

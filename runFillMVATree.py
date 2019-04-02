@@ -10,6 +10,7 @@ parser.add_argument("-m", "--maxevents", dest="maxevents", type=int, default=ROO
 parser.add_argument("-t", "--ttree", dest="ttree", default="ggNtuplizer/EventTree", help="TTree Name")
 parser.add_argument("-r", "--runparallel", dest="runparallel", default=False, help="Enable PROOF")
 parser.add_argument("-c", "--mvacut", dest="mvacut", type=float, default=0.5, help="MVA cut")
+parser.add_argument("-p", "--oppcharge", dest="oppcharge", default=False, help="Opposite charge")
 args = parser.parse_args()
 
 
@@ -37,7 +38,9 @@ def analyzeTree(enumfChunk):
         tchain.Add(filename)
     print('Total number of events: ' + str(tchain.GetEntries()))
     myAnalyzer = BsPhiLLTupleTree(tchain)
-    myAnalyzer.Loop(outpath+'/'+args.outputfile+'_subset'+str(ich)+'.root', -1, args.mvacut)
+    oppCharge = False
+    if args.oppcharge: oppCharge = True
+    myAnalyzer.Loop(outpath+'/'+args.outputfile+'_subset'+str(ich)+'.root', -1, args.mvacut, oppCharge)
 
 
 if not args.runparallel:
@@ -47,12 +50,13 @@ if not args.runparallel:
             tchain.Add(filename.rstrip('\n'))
             break
     #tchain.Add('ggtree_data.root')
+    print(args.oppcharge)
     print('Total number of events: ' + str(tchain.GetEntries()))
-    analyzer = "MVAFillTree_electron"
+    analyzer = "MVAFillTree_electron_selectBest"
     ROOT.gSystem.CompileMacro("analyzer_class/%s.C"%(analyzer)) 
     from ROOT import BsPhiLLTupleTree
     myAnalyzer = BsPhiLLTupleTree(tchain)
-    myAnalyzer.Loop(args.outputfile, args.maxevents, args.mvacut)
+    myAnalyzer.Loop(args.outputfile, args.maxevents, args.mvacut, args.oppcharge)
 
 else:
 
@@ -68,10 +72,10 @@ else:
     # stplie files in to n(group) of chunks
     fChunks= list(chunks(fileList,group))
     print ("writing %s jobs for %s"%(len(fChunks),outputFolder))
-    analyzer = "MVAFillTree_electron_PyGTB"
+    analyzer = "MVAFillTree_electron"
     ROOT.gSystem.CompileMacro("analyzer_class/%s.C"%(analyzer)) 
     from ROOT import BsPhiLLTupleTree
-    pool = mp.Pool(processes = 6)
+    pool = mp.Pool(processes = 8)
     pool.map(analyzeTree, enumerate(fChunks))
     exec_me("hadd %s/%s %s/%s"%(outpath,args.outputfile+'.root',outpath,args.outputfile+'_subset*.root'))
     exec_me("rm %s/%s"%(outpath,args.outputfile+'_subset*.root'))

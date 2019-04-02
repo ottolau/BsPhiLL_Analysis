@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import ROOT
-from ROOT import TMVA, TFile, TTree, TCut
+#import ROOT
+#from ROOT import TMVA, TFile, TTree, TCut
 from subprocess import call
 from os.path import isfile
 
@@ -36,10 +36,16 @@ upfile = {}
 params = {}
 df = {}
 
-filename['bkg'] = "/eos/uscms/store/user/klau/BsPhiLL_output/BsPhiEE_MVATraining/BsPhiEE_MVATraining_Bkg.root"
-filename['sig'] = "/eos/uscms/store/user/klau/BsPhiLL_output/BsPhiEE_MVATraining/BsPhiEE_MVATraining_Sig.root"
+#filename['bkg'] = "/eos/uscms/store/user/klau/BsPhiLL_output/BsPhiEE_MVATraining/BsPhiEE_MVATraining_Bkg.root"
+#filename['sig'] = "/eos/uscms/store/user/klau/BsPhiLL_output/BsPhiEE_MVATraining/BsPhiEE_MVATraining_Sig.root"
 
-branches = ['elePtLead', 'elePtSublead', 'kaonPtLead', 'kaonPtSublead', 'jpsiPt', 'phiPt', 'bsPt', 'eledR', 'kaondR', 'jpsiPhidR', 'svProb', 'svCosine', 'svLxySig', 'eleD0Lead', 'eleD0Sublead', 'eleDzLead', 'eleDzSublead', 'kaonD0Lead', 'kaonD0Sublead', 'kaonDzLead', 'kaonDzSublead', 'kaonNormChi2Lead', 'kaonNormChi2Sublead']
+#filename['bkg'] = "../BsPhiJpsiEE_MVATraining_Bkg.root"
+#filename['sig'] = "../BsPhiJpsiEE_MVATraining_Sig.root"
+
+filename['bkg'] = "../BsPhiJpsiEE_MVATraining_Bkg_pTcuts.root"
+filename['sig'] = "../BsPhiJpsiEE_MVATraining_Sig_pTcuts.root"
+
+branches = ['elePtLead', 'elePtSublead', 'kaonPtLead', 'kaonPtSublead', 'bsPt', 'svProb', 'svCosine', 'svLxySig', 'eleD0Lead', 'eleD0Sublead', 'eleDzLead', 'eleDzSublead', 'kaonD0Lead', 'kaonD0Sublead', 'kaonDzLead', 'kaonDzSublead', 'kaonNormChi2Lead', 'kaonNormChi2Sublead']
 
 input_dim = len(branches)
 
@@ -63,7 +69,7 @@ Y = dataset[:,input_dim]
 
 X_train_val, X_test, Y_train_val, Y_test = train_test_split(X, Y, test_size=0.2, random_state=7)
 
-early_stopping = EarlyStopping(monitor='val_loss', patience=10)
+early_stopping = EarlyStopping(monitor='val_loss', patience=30)
 
 model_checkpoint = ModelCheckpoint('dense_model.h5', monitor='val_loss', 
                                    verbose=0, save_best_only=True, 
@@ -85,7 +91,7 @@ def build_custom_model(num_hiddens=2, initial_node=32,
 def train(model, batch_size=64):
     history = model.fit(X_train_val, 
                     Y_train_val, 
-                    epochs=150, 
+                    epochs=200, 
                     batch_size=batch_size, 
                     verbose=0,
                     callbacks=[early_stopping, model_checkpoint], 
@@ -97,11 +103,11 @@ def train(model, batch_size=64):
     #best_acc = max(history.history['val_acc'])
     #return best_acc
 
-space  = [Integer(1, 4, name='hidden_layers'),
-          Integer(16, 1024, name='initial_nodes'),
+space  = [Integer(2, 5, name='hidden_layers'),
+          Integer(32, 1024, name='initial_nodes'),
           Real(10**-6, 10**-3, "log-uniform", name='l2_lambda'),
-          Real(0.0,0.7,name='dropout'),
-          Integer(8,1024,name='batch_size'),
+          Real(0.0,0.5,name='dropout'),
+          Integer(512,4096,name='batch_size'),
           Real(10**-5, 10**-1, "log-uniform", name='learning_rate'),
           ]
 
@@ -123,12 +129,12 @@ def objective(**X):
 
 begt = time.time()
 print("Begin Bayesian optimization")
-res_gp = gp_minimize(objective, space, n_calls=20, random_state=3)
+res_gp = gp_minimize(objective, space, n_calls=200, random_state=3)
 print("Finish optimization in {}s".format(time.time()-begt))
 
 plt.figure()
 plot_convergence(res_gp)
-plt.savefig('BayesianOptimization_ConvergencePlot.png')
+plt.savefig('BayesianOptimization_BsPhiJpsiEE_ConvergencePlot_GPU_noPhiM_pTcuts.png')
 
 
 print("Best parameters: \

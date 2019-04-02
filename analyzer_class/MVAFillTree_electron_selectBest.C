@@ -155,7 +155,7 @@ void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut,
 
    TString TMVAmethod = "PyKeras method";
 
-   reader->BookMVA("PyKeras method", "/uscms/home/klau/nobackup/BtoKll/BParking2018/BsPhiLL_Integrated/BsPhiLL_Analysis/MVATraining/dataset/weights/TMVAClassification_BsPhiJpsiEE_noPhiM_BOBest_PyKeras.weights.xml");
+   reader->BookMVA("PyKeras method", "/uscms/home/klau/nobackup/BtoKll/BParking2018/BsPhiLL_Integrated/BsPhiLL_Analysis/dataset/weights/TMVAClassification_BsPhiJpsiEE_noPhiM_pTcuts_PyKeras.weights.xml");
 
    // Initialization
    TTree *tree = new TTree("mvaTree", "mva tree");
@@ -188,6 +188,9 @@ void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut,
        *
        * ************************/
 
+      double bestMVA = -1.0;
+      double bestMVAarg = -1;
+
       for (int i=0; i<nEle; ++i) {
 
 	 bool preCut = true;
@@ -201,9 +204,8 @@ void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut,
 	 }
 	 if (elePt_lead->at(i) < 0.4 || elePt_sublead->at(i) < 0.4 || kaonEEPt_lead->at(i) < 0.4 || kaonEEPt_sublead->at(i) < 0.4) continue;
          if (!eleConvVeto_lead->at(i) || !eleConvVeto_sublead->at(i)) continue;
-	 //if (elePt_lead->at(i) < 2.0 || elePt_sublead->at(i) < 2.0) continue;
-	 //if (kaonEEPt_lead->at(i) < 1.0 || kaonEEPt_sublead->at(i) < 0.7) continue;
-	 //if (eleSvCosAngle->at(i) < 0.9) continue;
+	 if (bsEEJpsiMass->at(i) < jpsilow || bsEEJpsiMass->at(i) > jpsiup) continue;
+	 if (bsEEPhiMass->at(i) < philow || bsEEPhiMass->at(i) > phiup) continue;
 
 	 elePtLead = elePt_lead->at(i)/bsEEBsMass->at(i);
 	 eleD0Lead = eleD0_lead->at(i);
@@ -237,21 +239,24 @@ void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut,
 
 	 double mvaValue = reader->EvaluateMVA(TMVAmethod);
 
-	 if (mvaValue > mvaCut) {
-
-	    mvaTree.m_ee = bsEEJpsiMass->at(i);
-	    mvaTree.m_KK = bsEEPhiMass->at(i);
-	    mvaTree.m_KKee = bsEEBsMass->at(i);
-	    mvaTree.mvaValue = mvaValue;
-	    mvaTree.eledR = eledR;
-	    mvaTree.kaondR = kaondR;
-	    mvaTree.jpsiPhidR = jpsiPhidR;
-
-	    tree->Fill();
-	    nAccept++;
+	 if (mvaValue > mvaCut && mvaValue > bestMVA) {
+	   bestMVA = mvaValue;
+	   bestMVAarg = i;
 	 }
       }
 
+      if (bestMVA > 0.0) {
+	 mvaTree.m_ee = bsEEJpsiMass->at(bestMVAarg);
+	 mvaTree.m_KK = bsEEPhiMass->at(bestMVAarg);
+	 mvaTree.m_KKee = bsEEBsMass->at(bestMVAarg);
+	 mvaTree.mvaValue = bestMVA;
+	 mvaTree.eledR = bsEEdRele->at(bestMVAarg);
+	 mvaTree.kaondR = bsEEdRkaon->at(bestMVAarg);
+	 mvaTree.jpsiPhidR = bsEEdRJpsiPhi->at(bestMVAarg);
+
+	 tree->Fill();
+	 nAccept++;
+      }
    }
 
    file_out.cd();

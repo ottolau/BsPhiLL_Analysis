@@ -44,9 +44,12 @@ typedef struct {
   Float_t       jpsiMass;
   Float_t       phiMass;
   Float_t       bsMass;
+  Float_t	jpsiMassFrac;
+  Float_t	phiMassFrac;
+  Float_t	bsMassFrac;
 } bsFeatures_t;
 
-void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut)
+void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut, bool oppCharge)
 {
 //   In a ROOT session, you can do:
 //      root> .L BsPhiLLTupleTree.C
@@ -171,6 +174,9 @@ void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut)
    tree->Branch("jpsiMass",     &bsFeatures.jpsiMass,     "jpsiMass/F");
    tree->Branch("phiMass",      &bsFeatures.phiMass,      "phiMass/F");
    tree->Branch("bsMass",       &bsFeatures.bsMass,       "bsMass/F");
+   tree->Branch("jpsiMassFrac",     &bsFeatures.jpsiMassFrac,     "jpsiMassFrac/F");
+   tree->Branch("phiMassFrac",      &bsFeatures.phiMassFrac,      "phiMassFrac/F");
+   tree->Branch("bsMassFrac",       &bsFeatures.bsMassFrac,       "bsMassFrac/F");
 
 
    TRandom3 rand;
@@ -200,14 +206,17 @@ void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut)
 	 bool preCut = true;
 
 	 if (eleCharge_lead->at(i) * eleCharge_sublead->at(i) < 0) continue;
-	 if (kaonEECharge_lead->at(i) * kaonEECharge_sublead->at(i) > 0) continue; // same charge
-	 if (elePt_lead->at(i) < 0.4 || elePt_sublead->at(i) < 0.4 || kaonEEPt_lead->at(i) < 0.4 || kaonEEPt_sublead->at(i) < 0.4) continue;
+	 if (kaonEECharge_lead->at(i) * kaonEECharge_sublead->at(i) < 0) continue; // same charge
+	 //if (elePt_lead->at(i) < 0.4 || elePt_sublead->at(i) < 0.4 || kaonEEPt_lead->at(i) < 0.4 || kaonEEPt_sublead->at(i) < 0.4) continue;
+	 if (elePt_lead->at(i) < 2.0 || elePt_sublead->at(i) < 2.0) continue;
+	 if (kaonEEPt_lead->at(i) < 1.0 || kaonEEPt_sublead->at(i) < 0.7) continue;
+	 if (eleSvCosAngle->at(i) < 0.9) continue;
          if (!eleConvVeto_lead->at(i) || !eleConvVeto_sublead->at(i)) continue;
 
 	 if (preCut == true) {
 
     	    //if  (!((jpsisideminuslow < bsEEJpsiMass->at(i) && bsEEJpsiMass->at(i) < jpsisideplusup) && ((phisideminuslow < bsEEPhiMass->at(i) && bsEEPhiMass->at(i) < phisideminusup) || (phisidepluslow < bsEEPhiMass->at(i) && bsEEPhiMass->at(i) < phisideplusup)) && (bslow < bsEEBsMass->at(i) && bsEEBsMass->at(i) < bsup))) continue;
-     	    if  (!((philow < bsEEPhiMass->at(i) && bsEEPhiMass->at(i) < phiup) && (bslow < bsEEBsMass->at(i) && bsEEBsMass->at(i) < bsup))) continue;
+     	    //if  (!((philow < bsEEPhiMass->at(i) && bsEEPhiMass->at(i) < phiup) && (bslow < bsEEBsMass->at(i) && bsEEBsMass->at(i) < bsup))) continue;
   
             //if (rand.Uniform(0.0, 1.0) > 0.5) continue;
 
@@ -258,7 +267,9 @@ void BsPhiLLTupleTree::Loop(TString outputfile, Int_t maxevents, Float_t mvaCut)
 	    bsFeatures.jpsiMass = bsEEJpsiMass->at(i);
 	    bsFeatures.phiMass = bsEEPhiMass->at(i);
 	    bsFeatures.bsMass = bsEEBsMass->at(i);
-
+	    bsFeatures.jpsiMassFrac = bsEEJpsiMass->at(i)/jpsiM;
+	    bsFeatures.phiMassFrac = bsEEPhiMass->at(i)/phiM;
+	    bsFeatures.bsMassFrac = bsEEBsMass->at(i)/bsM;
 
 	    tree->Fill();
 	    nAccept++;

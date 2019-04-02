@@ -46,6 +46,9 @@ h_q2_InvM = ROOT.TH1D("h_q2_InvM", "", 200, 0.0, 25.0);
 h_jpsi_InvM = ROOT.TH1D("h_jpsi_InvM", "", 100, 2.4, 3.8);
 h_phiee_InvM = ROOT.TH1D("h_phiee_InvM", "", 100, 0.98, 1.06);
 h_bsee_InvM = ROOT.TH1D("h_bsee_InvM", "", 50, 4.5, 6.0);
+#h_electron_dR = ROOT.TH1D("h_electron_dR", "", 120, 0.0, 4.0);
+#h_kaon_ee_dR = ROOT.TH1D("h_kaon_ee_dR", "", 120, 0.0, 4.0);
+#h_jpsiPhiOpen_ee = ROOT.TH1D("h_jpsiPhiOpen_ee", "", 120, 0.0, 4.0);
 
 
 eleM = 0.0005109989461
@@ -72,7 +75,13 @@ for ievent,event in enumerate(tchain):
         temp_m_ee = event.m_ee
     h_phiee_InvM.Fill(event.m_KK)
     if jpsilow < event.m_ee < jpsiup and philow < event.m_KK < phiup:
+    #if jpsilow < event.m_ee < jpsiup:
+    #if jpsilow < event.m_ee < jpsiup and philow < event.m_KK < phiup and event.eledR < 1.5 and event.kaondR < 0.5 and event.jpsiPhidR < 1.5:
+    #if jpsilow < event.m_ee < jpsiup and philow < event.m_KK < phiup and event.eledR > 0.3:
         h_bsee_InvM.Fill(event.m_KKee)
+    #h_electron_dR.Fill(event.eledR)
+    #h_kaon_ee_dR.Fill(event.kaondR)
+    #h_jpsiPhiOpen_ee.Fill(event.jpsiPhidR)
 
 
 file_out.cd()

@@ -66,7 +66,7 @@ varUnitMap = {"pt": "p_{T} [GeV]",
 def make_plots(filename):
     f = ROOT.TFile(filename)
     dir_list = ROOT.gDirectory.GetListOfKeys()
-    outputfile = "BsPhiEE_KinematicsPlots_data_sameCharge"
+    outputfile = "BsPhiJpsiEE_KinematicsPlots_mc"
     c_list = []
 
     for key in dir_list:

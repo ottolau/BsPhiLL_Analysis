@@ -722,11 +722,13 @@ public :
    Float_t elecM = 0.000510998;
    Float_t muonM = 0.1056583745;
    Float_t kaonM = 0.493677;
+   Float_t jpsiM = 3.096916;
+   Float_t phiM = 1.019461;
    Float_t bsM = 5.3663;
    Float_t jpsilow = 2.9;
-   Float_t jpsiup = 3.45;
+   Float_t jpsiup = 3.2;
    Float_t philow = 1.01;
-   Float_t phiup = 1.04;
+   Float_t phiup = 1.03;
    Float_t bslow = 5.0;
    Float_t bsup = 5.8;
    Float_t bssideminuslow = 5.1;
@@ -748,7 +750,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(TString outputfile, Int_t maxevents, Float_t mvaCut);
+   virtual void     Loop(TString outputfile, Int_t maxevents, Float_t mvaCut, bool oppCharge);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    Float_t          deltaPhi(Float_t phi1, Float_t phi2);

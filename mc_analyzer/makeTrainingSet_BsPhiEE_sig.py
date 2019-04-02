@@ -56,6 +56,9 @@ ROOT.gROOT.ProcessLine(
   Float_t       jpsiMass;\
   Float_t       phiMass;\
   Float_t       bsMass;\
+  Float_t       jpsiMassFrac;\
+  Float_t       phiMassFrac;\
+  Float_t       bsMassFrac;\
 };" );
 
 if os.path.isfile('~/.rootlogon.C'): ROOT.gROOT.Macro(os.path.expanduser('~/.rootlogon.C'))
@@ -71,6 +74,8 @@ sw.Start()
 eleM = 0.0005109989461
 muonM = 0.1056583745
 kaonM = 0.493677
+jpsiM = 3.096916;
+phiM = 1.019461;
 bsM = 5.3663
 bssideminuslow = 5.1
 bssideminusup = 5.3
@@ -84,8 +89,10 @@ phisideminuslow = 1.0
 phisideminusup = 1.01
 phisidepluslow = 1.04
 phisideplusup = 1.05
-bslow = 4.8
+bslow = 4.5
 bsup = 6.0
+philow = 0.95
+phiup = 1.10
 
 lv_ele_lead_reco = ROOT.TLorentzVector()
 lv_ele_sublead_reco = ROOT.TLorentzVector()
@@ -132,12 +139,15 @@ branches = [
   'bsPt',
   'jpsiMass',
   'phiMass',
-  'bsMass'
+  'bsMass',
+  'jpsiMassFrac',
+  'phiMassFrac',
+  'bsMassFrac'
 ]
 
 #branch_descriptor = ':'.join([br + '/F' for br in branches])
 
-print args.maxevents, args.trigger
+print(args.maxevents, args.trigger)
 
 numBGEvents = 0
 numSGEvents = 0
@@ -147,7 +157,7 @@ rand.SetSeed(0)
 
 MCtchain = ROOT.TChain('tree')
 MCtchain.Add(args.signal)
-print 'Total number of signal events: ' + str(MCtchain.GetEntries())
+print('Total number of signal events: ' + str(MCtchain.GetEntries()))
 
 bsFeatures = ROOT.bsFeatures_t()
 stree = ROOT.TTree('signal', 'signal tree')
@@ -158,27 +168,38 @@ for var in branches:
 for ievent,event in enumerate(MCtchain):
   #if ievent > args.maxevents and args.maxevents != -1: break
   #if ievent % 1000 == 0: print 'Processing entry ' + str(ievent)
-  if ievent % 10000 == 0: print 'Processing entry ' + str(ievent) +' , number of selected events: ' + str(numSGEvents)
+  if ievent % 10000 == 0: print('Processing entry ' + str(ievent) +' , number of selected events: ' + str(numSGEvents))
   if numSGEvents >= args.maxevents: break
   
   if event.tag_mu_reco_dxy == -99: continue
   if abs(event.b0_lp_eta) > 2.5 or abs(event.b0_lm_eta) > 2.5 or abs(event.b0_k_eta) > 2.5 or abs(event.b0_pi_eta) > 2.5: continue
-  if abs(event.b0_lp_reco_pt) < 0.4 or abs(event.b0_lm_reco_pt) < 0.4 or abs(event.b0_k_reco_pt) < 0.4 or abs(event.b0_pi_reco_pt) < 0.4: continue
+  #if abs(event.b0_lp_reco_pt) < 0.4 or abs(event.b0_lm_reco_pt) < 0.4 or abs(event.b0_k_reco_pt) < 0.4 or abs(event.b0_pi_reco_pt) < 0.4: continue
   if event.foundB0 < 0.7: continue
   #if event.tag_mu_reco_pt < 9: continue
   #if abs(event.tag_mu_reco_dxy/event.tag_mu_reco_dxyError) < 6: continue
 
-  if event.b0_lp_pt > event.b0_lm_pt:
+  if event.b0_lp_reco_pt > event.b0_lm_reco_pt:
       lv_ele_lead_reco.SetPtEtaPhiM(event.b0_lp_reco_pt, event.b0_lp_reco_eta, event.b0_lp_reco_phi, eleM)
       lv_ele_sublead_reco.SetPtEtaPhiM(event.b0_lm_reco_pt, event.b0_lm_reco_eta, event.b0_lm_reco_phi, eleM)
   else:
       lv_ele_lead_reco.SetPtEtaPhiM(event.b0_lm_reco_pt, event.b0_lm_reco_eta, event.b0_lm_reco_phi, eleM)
       lv_ele_sublead_reco.SetPtEtaPhiM(event.b0_lp_reco_pt, event.b0_lp_reco_eta, event.b0_lp_reco_phi, eleM)
-
-  lv_kaon_lead_reco.SetPtEtaPhiM(event.b0_k_reco_pt, event.b0_k_reco_eta, event.b0_k_reco_phi, kaonM)
-  lv_kaon_sublead_reco.SetPtEtaPhiM(event.b0_pi_reco_pt, event.b0_pi_reco_eta, event.b0_pi_reco_phi, kaonM)
+  if event.b0_k_reco_pt > event.b0_pi_reco_pt:
+      lv_kaon_lead_reco.SetPtEtaPhiM(event.b0_k_reco_pt, event.b0_k_reco_eta, event.b0_k_reco_phi, kaonM)
+      lv_kaon_sublead_reco.SetPtEtaPhiM(event.b0_pi_reco_pt, event.b0_pi_reco_eta, event.b0_pi_reco_phi, kaonM)
+  else:
+      lv_kaon_lead_reco.SetPtEtaPhiM(event.b0_pi_reco_pt, event.b0_pi_reco_eta, event.b0_pi_reco_phi, kaonM)
+      lv_kaon_sublead_reco.SetPtEtaPhiM(event.b0_k_reco_pt, event.b0_k_reco_eta, event.b0_k_reco_phi, kaonM)
 
   lv_bs_reco = lv_ele_lead_reco + lv_ele_sublead_reco + lv_kaon_lead_reco + lv_kaon_sublead_reco
+
+  if not philow < (lv_kaon_lead_reco + lv_kaon_sublead_reco).M() < phiup: continue
+  if not bslow < lv_bs_reco.M() < bsup: continue
+  if not (lv_ele_lead_reco + lv_ele_sublead_reco).M() < 5.0: continue
+
+  if lv_ele_lead_reco.Pt() < 2.0 or lv_ele_sublead_reco.Pt() < 2.0: continue
+  if lv_kaon_lead_reco.Pt() < 1.0 or lv_kaon_sublead_reco.Pt() < 0.7: continue
+  if event.b0_reco_cosAngle < 0.9: continue
 
   bsFeatures.elePtLead = lv_ele_lead_reco.Pt()/lv_bs_reco.M()
   bsFeatures.eleEtaLead = lv_ele_lead_reco.Eta()
@@ -249,6 +270,9 @@ for ievent,event in enumerate(MCtchain):
   bsFeatures.jpsiMass = (lv_ele_lead_reco + lv_ele_sublead_reco).M()
   bsFeatures.phiMass = (lv_kaon_lead_reco + lv_kaon_sublead_reco).M()
   bsFeatures.bsMass = lv_bs_reco.M()
+  bsFeatures.jpsiMassFrac = (lv_ele_lead_reco + lv_ele_sublead_reco).M()/jpsiM
+  bsFeatures.phiMassFrac = (lv_kaon_lead_reco + lv_kaon_sublead_reco).M()/phiM
+  bsFeatures.bsMassFrac = lv_bs_reco.M()/bsM
 
   stree.Fill()
   numSGEvents = numSGEvents + 1
@@ -261,5 +285,5 @@ file_out.Write()
 file_out.Close()
 
 sw.Stop()
-print 'Real time: ' + str(round(sw.RealTime() / 60.0,2)) + ' minutes'
-print 'CPU time:  ' + str(round(sw.CpuTime() / 60.0,2)) + ' minutes'
+print('Real time: ' + str(round(sw.RealTime() / 60.0,2)) + ' minutes')
+print('CPU time:  ' + str(round(sw.CpuTime() / 60.0,2)) + ' minutes')
