@@ -10,7 +10,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE);
 ROOT.gStyle.SetOptStat(0)
 #ROOT.gStyle.SetOptTitle(0)
 
-varList = ["pt",
+varList = ["Pt",
            "eta",
            "phi",
            "dR",
@@ -37,7 +37,7 @@ varList = ["pt",
            "q2"
             ]
 
-varUnitMap = {"pt": "p_{T} [GeV]",
+varUnitMap = {"Pt": "p_{T} [GeV]",
               "eta": "#eta",
               "phi": "#phi",
               "dR": "#Delta R",
@@ -68,13 +68,18 @@ varUnitMap = {"pt": "p_{T} [GeV]",
 def make_plots(filename):
     f = ROOT.TFile(filename)
     dir_list = ROOT.gDirectory.GetListOfKeys()
-    outputfile = "BsPhiJpsiEE_KinematicsPlots_lowPtElectrons"
+    #outputfile = "BsPhiJpsiEE_KinematicsPlots_lowPtElectrons"
+    outputfile = filename.replace('.root','') + "_distributions"
     c_list = []
+
+    saveHist = ['h_elePt_lead', 'h_elePt_sublead', 'h_kaonPt_lead', 'h_kaonPt_sublead']
 
     for key in dir_list:
         if key.GetClassName() == "TH1D":
             histo = key.ReadObj()
             histo_name = histo.GetName()
+            #if histo_name not in saveHist: continue
+
             canvas_name = "c_" + histo_name
             c = ROOT.TCanvas(canvas_name, canvas_name, 800, 600)
             unit = ""
@@ -85,16 +90,16 @@ def make_plots(filename):
             histo.GetYaxis().SetTitle("N")
             histo.GetXaxis().SetTitle(unit)
             histo.SetLineColor(2)
-            histo.DrawCopy()             
+            histo.DrawCopy("e")             
             c_list.append(c)
 
     for i,c in enumerate(c_list):
         if i == 0:
-            c.Print("Figures/{}.pdf(".format(outputfile),"pdf")
+            c.Print("Figures_samesign/{}.pdf(".format(outputfile),"pdf")
         elif i == len(c_list)-1:
-            c.Print("Figures/{}.pdf)".format(outputfile),"pdf")
+            c.Print("Figures_samesign/{}.pdf)".format(outputfile),"pdf")
         else:
-            c.Print("Figures/{}.pdf".format(outputfile),"pdf")
+            c.Print("Figures_samesign/{}.pdf".format(outputfile),"pdf")
 
 
 if __name__ == "__main__":

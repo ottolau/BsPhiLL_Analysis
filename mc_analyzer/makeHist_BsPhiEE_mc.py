@@ -74,8 +74,10 @@ h_kaon_ee_D0_sublead_mc = ROOT.TH1D("h_kaon_ee_D0_sublead_mc", "", 100, -0.5, 0.
 h_kaon_ee_D0Sig_sublead_mc = ROOT.TH1D("h_kaon_ee_D0Sig_sublead_mc", "", 100, -20.0, 20.0);
 h_kaon_ee_normChi2_sublead_mc = ROOT.TH1D("h_kaon_ee_normChi2_sublead_mc", "", 100, 0.0, 5.0);
 
+h_bs_pt_ee_mc = ROOT.TH1D("h_bs_pt_ee_mc", "", 100, 0.0, 50.0);
+
 h_svProb_ee_mc = ROOT.TH1D("h_svProb_ee_mc", "", 100, 0.0, 1.0);
-h_svCosAngle_ee_mc = ROOT.TH1D("h_svCosAngle_ee_mc", "", 20, -1.0, 1.0);
+h_svCosAngle_ee_mc = ROOT.TH1D("h_svCosAngle_ee_mc", "", 200, -1.0, 1.0);
 h_svCtxy_ee_mc = ROOT.TH1D("h_svCtxy_ee_mc", "", 100, -1.0, 1.0);
 h_svLxy_ee_mc = ROOT.TH1D("h_svLxy_ee_mc", "", 100, 0.0, 1);
 h_svLxySig_ee_mc = ROOT.TH1D("h_svLxySig_ee_mc", "", 200, 0.0, 60);
@@ -205,6 +207,7 @@ for ievent,event in enumerate(tchain):
     ctxy = ((event.b0_reco_x - event.b0_reco_vtx)*lv_bs_reco.Px() + (event.b0_reco_y - event.b0_reco_vty)*lv_bs_reco.Py())/(lv_bs_reco.Pt()**2)*bsM
 
 
+    h_bs_pt_ee_mc.Fill(lv_bs_reco.Pt())
     h_svProb_ee_mc.Fill(ROOT.TMath.Prob(event.b0_reco_chi2, int(event.b0_reco_ndof)))  
     h_svCosAngle_ee_mc.Fill(event.b0_reco_cosAngle)
     h_svCtxy_ee_mc.Fill(ctxy)
